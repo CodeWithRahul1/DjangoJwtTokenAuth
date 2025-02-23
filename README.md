@@ -8,6 +8,7 @@
 - **Django Admin Panel** support
 - Secure API authentication with **JWT**
 - Uses **Django REST Framework (DRF)**
+- Implements **Rate Limiting, Load Balancing, Caching, and Circuit Breaking**
 
 ---
 
@@ -23,7 +24,7 @@ cd django-jwt-project
 ```bash
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install django djangorestframework djangorestframework-simplejwt
+pip install django djangorestframework djangorestframework-simplejwt django-ratelimit django-cacheops
 ```
 
 ### 3️⃣ **Setup Django Project**
@@ -81,7 +82,7 @@ POST /api/auth/token/refresh/
 
 ---
 
-## 🛆 **Product APIs (Authenticated)**
+## 🚶 **Product APIs (Authenticated)**
 🔑 **Use Bearer Token in Headers**  
 ```http
 Authorization: Bearer access_token_here
@@ -116,10 +117,50 @@ DELETE /api/products/{id}/
 
 ---
 
-## 🏋️‍♂️ **Django Admin Panel**
+## 🏋️ **Django Admin Panel**
 - Access the admin panel at **`http://127.0.0.1:8000/admin/`**
 - Log in with the superuser credentials
 - Manage users and products easily
+
+---
+
+## 💪 **Performance Enhancements**
+
+### 1. 📊 **Rate Limiting**
+Implemented using `django-ratelimit` to prevent excessive API calls:
+```python
+from django_ratelimit.decorators import ratelimit
+
+@ratelimit(key='ip', rate='10/m', method=['GET', 'POST'], block=True)
+def my_view(request):
+    return Response({"message": "This endpoint is rate-limited."})
+```
+
+### 2. 🌌 **Load Balancing**
+- Can be achieved using **NGINX** or **AWS ELB**.
+- Helps distribute traffic across multiple Django instances.
+
+### 3. 🔐 **Caching**
+Implemented using **django-cacheops** for caching database queries:
+```python
+CACHEOPS = {
+    'products.product': {'ops': 'all', 'timeout': 60*15},  # Cache for 15 minutes
+}
+```
+
+### 4. 🛡 **Circuit Breaking**
+Implemented using try-except to prevent failures from cascading:
+```python
+from django.http import JsonResponse
+
+def safe_api_call():
+    try:
+        response = requests.get("https://external-api.com/data", timeout=5)
+        response.raise_for_status()
+        return response.json()
+    except requests.RequestException:
+        return JsonResponse({"error": "Service Unavailable"}, status=503)
+```
 
 ---
 
@@ -128,6 +169,8 @@ DELETE /api/products/{id}/
 - **Django REST Framework (DRF)**
 - **JWT Authentication (Simple JWT)**
 - **SQLite (Default DB, can be changed)**
+- **NGINX (For Load Balancing)**
+- **Redis (For Caching)**
 
 ---
 
@@ -136,10 +179,9 @@ Want to contribute? Feel free to fork this repository and submit a pull request!
 
 ---
 
-## 🍿️ **Keywords for Searchability**
-`django jwt` `django rest framework jwt` `drf authentication` `django login api` `django product management api` `jwt token authentication` `drf jwt login` `django api with jwt`
+## 🍿 **Keywords for Searchability**
+`django jwt` `django rest framework jwt` `drf authentication` `django login api` `django product management api` `jwt token authentication` `drf jwt login` `django api with jwt` `django rate limiting` `django caching` `django circuit breaking`
 
----
 ---
 
 ### **📩 Contact**

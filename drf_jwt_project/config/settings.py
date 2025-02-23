@@ -55,10 +55,36 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'config.urls'
 
+from datetime import timedelta
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',  # Throttling for anonymous users
+        'rest_framework.throttling.UserRateThrottle',  # Throttling for authenticated users
+        'rest_framework.throttling.ScopedRateThrottle',  # Custom scopes for APIs
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '5/minute',     # Anonymous users: 5 requests per minute
+        'user': '100/hour',     # Authenticated users: 100 requests per hour
+        'login': '3/minute',    # Limit logins to 3 requests per minute
+    }
+}
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",  # Redis server URL
+    }
+}
+
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(hours=1),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "AUTH_HEADER_TYPES": ("Bearer",),
 }
 
 
